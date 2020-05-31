@@ -1,15 +1,42 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import Vue from "vue";
+import Vuex from "vuex";
+import { db } from "@/main";
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    items: null,
+  },
+  getters: {
+    getItems: (state) => {
+      return state.items;
+    },
   },
   mutations: {
+    setItems: (state) => {
+      let items = [];
+
+      db.collection("items")
+        .orderBy("created_at")
+        .onSnapshot((snapshot) => {
+          items = [];
+          snapshot.forEach((doc) => {
+            items.push({
+              id: doc.id,
+              name: doc.data().name,
+              description: doc.data().description,
+              rating: doc.data().rating,
+            });
+          });
+          console.log("items", items);
+          state.items = items;
+        });
+    },
   },
   actions: {
+    setItems: (context) => {
+      context.commit("setItems");
+    },
   },
-  modules: {
-  }
-})
+});
